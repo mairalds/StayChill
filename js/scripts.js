@@ -1,60 +1,28 @@
+//Start Pictures adding and price per night//
 
-/* var products = {
-    'white': {
-        
-        'plain': {
-            'unit_price': 5.12,
-            'photo': 'v-white.jpg' 
-        },
-        'printed': {
-            'unit_price': 8.95,
-            'photo': 'v-white-personalized.jpg' 
-        }
+var accommodationkind = {
+    "Hotel": {
+        "nightPrice": 157.00,
+        "photo": "hotel-picture.jpg"
     },
-    
-    'colored': {
-        'plain': {
-            'unit_price': 6.04,
-            'photo': 'v-color.jpg' 
-        },
-        'printed': {
-            'unit_price': 9.47,
-            'photo': 'v-color-personalized.png' 
-        }
+
+    "Hostel": {
+        "nightPrice": 30.00,
+        "photo": "hostel-picture.jpg"
+    },
+
+    "Motel": {
+        "nightPrice": 90.00,
+        "photo": "motel-picture.jpg"
+    },
+
+    "House": {
+        "nightPrice": 240.00,
+        "photo": "house-picture.jpg"
     }
-} */
 
-
-// Search params
-
-/* var search_params = {
-    "quantity": "",
-    "color": "",
-    "quality": "",
-    "style": "",
-} */
-
-//Search params Maira test//
-var search_params = {
-    "accommodation-type": "",
-    "guests": "",
-    "nights": "",
-    "meals": "",
 }
-
-
-// Additional pricing rules:
-
-// 1. The prices above are for Basic quality (q150). 
-// The high quality shirt (190g/m2) has a 12% increase in the unit price.
-
-// 2. Apply the following discounts for higher quantities: 
-    // 1: above 1.000 units - 20% discount
-    // 2: above 500 units - 12% discount
-    // 3: above 100 units - 5% discount
-
-
-// Solution:
+//Function for creating data accomodation and min/max of guests//
 
 function loadGuests(qtd, skipfirst) {
     $('#guests').empty();
@@ -67,12 +35,7 @@ function loadGuests(qtd, skipfirst) {
       }
 }
 
-function loadNights(min, max) {
-    $('#nights').empty();
-    for (let i = min; i <= max; i++) {
-        $('#nights').append($('<option>', {value:i, text:i}));
-      }
-}
+//Function for creating data accomodation and min/max of nights//
 
 function loadNights(min, max) {
     $('#nights').empty();
@@ -80,10 +43,14 @@ function loadNights(min, max) {
         $('#nights').append($('<option>', {value:i, text:i}));
       }
 }
+
+//Function for creating data accomodation and meals options accordinly//
 
 function loadMeal(mealName){
     $('#meals').append($('<option>', {value:mealName, text:mealName}));
 }
+
+//Function for displaying the description of booking after user selection//
 
 function updateBookingDetails(){
     accommodationSelector = $("#accommodation-type .option-button.selected").attr('id');
@@ -98,6 +65,8 @@ function updateBookingDetails(){
     mealsSelector = $("#meals").val();
     $("#result-meals").html(mealsSelector);
 }
+
+//Function for loading number of guests and meals options in accordance with accomodation selected//
 
 function loadBookingInfo() {
     $(".refresh-loader").show();
@@ -140,6 +109,7 @@ function loadBookingInfo() {
 
 }
 
+//Function for loading page and timer//
 
 function update_order_details() {
     loadBookingInfo();
@@ -149,42 +119,48 @@ function update_order_details() {
      },500);        
 }
 
+//Function for displaying price per night in accordance with accomodation//
 
-$(function(){
+function calculateprice(selectedAccommodation) {
 
-    //First time running
-    update_order_details()
+    nightpricecalc = accommodationkind[selectedAccommodation].nightPrice;
+    nightsSelector = $("#nights").val();
 
+    totalamount = (nightsSelector * nightpricecalc).toFixed(2);
 
-//Calculate the price//
+    $("#price").html("NZD "+totalamount);
+}
 
-    /* function calculate_total() {
+//Function for when user clicks on accomodation it updates the photo//
 
-        var unitPrice = products[search_params.color][search_params.style].unit_price;
-        
-        if (search_params.quality == "q190") {
-            unitPrice *= 1.12;
-        }
+function updateacccommodationphoto(selectedAccommodation) {
+    if (selectedAccommodation== "Hotel")  {   
+        $("#photo-product").attr("src", "img/hotel-picture.jpg");
+    } else if(selectedAccommodation== "Hostel")  {   
+        $("#photo-product").attr("src", "img/hostel-picture.jpg");
+    } else if(selectedAccommodation== "Motel")  {   
+        $("#photo-product").attr("src", "img/motel-picture.jpg");
+    } else if(selectedAccommodation== "House")  {   
+        $("#photo-product").attr("src", "img/house-picture.jpg");
+    }
+}
 
-        var total = unitPrice * search_params.quantity;
-        
-        if (search_params.quantity >= 1000) {
-            total *= 0.8;
-        } else if (search_params.quantity >= 500) {
-            total *= 0.88;
-        } else if (search_params.quantity >= 100) {
-            total *= 0.95;
-        }
+//Function 'ready method' which will run once the page DOM is ready to execute JavaScript code//
 
-        return total.toLocaleString("en-US", {style: "currency",currency: "USD"});
+$(document).ready(function() {
 
-
-    } */
-
-
-    //Maira quantity>nights//
-    $("#accommodation-type").change(function(){
+    $(".option-button").click(function(){
+        //Changing the button color when clicking
+        var clickedParam = $(this).parent().attr("id");
+        var childSelector = "#" + clickedParam + " .option-button";
+        $(childSelector).removeClass("selected");
+        $(this).addClass("selected");
         update_order_details();
+        selectedAccommodation = $(this).attr("id");
+        calculateprice(selectedAccommodation);
+
+        updateacccommodationphoto(selectedAccommodation);
+        
     });
 
     $("#guests").change(function(){
@@ -193,50 +169,16 @@ $(function(){
 
     $("#nights").change(function(){
         updateBookingDetails();
+        accommodationSelector = $("#accommodation-type .option-button.selected").attr("id");
+        calculateprice(selectedAccommodation);
     });
 
     $("#meals").change(function(){
         updateBookingDetails();
     });
 
+    $("#complete-order").click(function(){
+        alert("Thank you! We will be in touch with you soon!");
+    });
 
-
-    // $(".option-button").click(function(){
-        
-    //     var clickedParam = $(this).parent().attr("id");
-    //     var childSelector = "#" + clickedParam + " .option-button";
-    //     $(childSelector).removeClass("selected");
-    //     $(this).addClass("selected");
-    //     var selectedChild = "#" + clickedParam + " .option-button.selected";
-    //     search_params[clickedParam] = $(selectedChild).attr('id');
-    //     update_order_details();
-
-    // });
-
-    //Teste Maira
-    $(".option-button").click(function(){
-        
-        var clickedParam = $(this).parent().attr("id");
-        var childSelector = "#" + clickedParam + " .option-button";
-        $(childSelector).removeClass("selected");
-        $(this).addClass("selected");
-        var selectedChild = "#" + clickedParam + " .option-button.selected";
-        search_params[clickedParam] = $(selectedChild).attr('id');
-        update_order_details();
-
-    });    
-
-
-
-    
 });
-
-
-
-
-
-
-
-
-
-
